@@ -1,10 +1,11 @@
+import { DATE_RANGE_PARAM } from '$lib/const/searchParams';
 import { trpcServer } from '$lib/trpc';
 import { DateRange } from '$lib/types/date-range';
 import { dateRangeFromMap } from '$lib/utils/date';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({fetch, url}) => {
-	const dateRangeType:DateRange = url.searchParams.get('date-range') as DateRange ?? DateRange.LastWeek;
+	const dateRangeType:DateRange = url.searchParams.get(DATE_RANGE_PARAM) as DateRange ?? DateRange.LastWeek;
 	const dateRangeFrom = dateRangeFromMap[dateRangeType];
 
 	dateRangeFrom.setHours(0, 0, 0, 0);
