@@ -1,5 +1,13 @@
 <script>
+	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/components/Header.svelte';
 	import '../app.css';
 </script>
 
-<slot />
+<Header />
+
+<main class="flex flex-col p-14">
+	<slot />
+</main>
+
+<Footer />
