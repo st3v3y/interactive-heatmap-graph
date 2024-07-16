@@ -1,35 +1,31 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { scaleBand, scaleLinear } from 'd3';
-	import type { UniqueVisitorData } from '$lib/types/unique-vistors';
+	import { packSiblings, scaleBand, scaleLinear } from 'd3';
+	import type { TooltipData } from '$lib/types/tooltip';
 	import { generateInterpolatedArray } from '$lib/utils/math';
-	import type { ChartTick } from '$lib/types/chart';
+	import type { ChartData, ChartTick, LineMarker } from '$lib/types/chart';
+    import ChartTooltip from '$lib/components/ChartTooltip.svelte';
 
-	export let points: UniqueVisitorData[];
+	export let data: ChartData[];
     export let xTicks: ChartTick[] = [];
 	export let yTicks: ChartTick[] = [];
     export let colorScale = ["#FFECE3", "#800020"];
+	export let width = 1000; // dynamic width, which changes onMount and when the window is resized
+	export let height = 900; // same as width
+	export let padding = { top: 20, right: 0, bottom: 40, left: 30 }; // padding for the heatmap chart
+    export let tooltipOffsetY = 20; // offset from the top of the heatmap data point
+    export let verticalMarkers: LineMarker[] = [];
+    export let getTooltipData: (data: ChartData) => TooltipData[] = () => [];
 
 	let svg: SVGElement;
-	let width = 1000; // dynamic width, which changes onMount and when the window is resized
-	let height = 900; // same as width
-
-	const padding = { top: 20, right: 40, bottom: 40, left: 30 }; // padding for the heatmap chart
-
-    let tooltip = {
-        show: false,
-        xPos : 0,
-        yPos : 0,
-        visitors : 0,
-        country : '',
-        hour : 0
-    }
-
+    let tooltipShow = false;
+    let tooltipPosX = 0;
+    let tooltipPosY = 0;
+    let tooltipData: TooltipData[] = [];
     let tooltipWidth = 0; // dynamic tooltip width
-    $: tooltipOffsetX = tooltipWidth / 2; // needed to place the tooltip in the middle
-    const tooltipOffsetY = 20; // offset from the top of the heatmap data point
 
-    $: maxValue = Math.max(...points.map((point) => point.value));
+    $: tooltipOffsetX = tooltipWidth / 2; // needed to place the tooltip in the middle
+    $: maxValue = Math.max(...data.map((data) => data.value));
     $: xTicksValues = xTicks.map((tick) => tick.value);
     $: yTicksValues = yTicks.map((tick) => tick.value);
 
@@ -41,14 +37,20 @@
 		.range([height - padding.bottom, padding.top])
         .domain(yTicksValues);
 
-    // as we place the heat map circles not on top of the lines, we need one my line at the x-end and y-end
+    // calculating the coordinates of the lines
     $: yExtendedLinePos = (yScale(yTicksValues[0]) ?? 0) + yScale.bandwidth(); 
     $: xExtendedLinePos = (xScale(xTicksValues[xTicksValues.length - 1]) ?? 0) + xScale.bandwidth();
-    $: yLastPos = yScale(yTicksValues[yTicksValues.length - 1]) ?? 0;
-
+    $: yLastPos = yScale(yTicksValues[yTicksValues.length - 1]) ?? 0 ;
     $: heatmapColor = scaleLinear()
         .range(colorScale)  // supposed to be Iterable<number>, but works with string[] for this case
         .domain(generateInterpolatedArray(colorScale.length, maxValue));
+
+    $: getXPosPercent = (percent: number): number => {
+        const perc = Math.max(0, Math.min(100, percent));
+        const tickPercentIndex = Math.round(xTicksValues.length * perc / 100);
+        const tickPercent = xTicksValues[tickPercentIndex];
+        return ((xScale(tickPercent) ?? 0)) - xScale.bandwidth() / 2;
+    }
 
 	onMount(resize);
 
@@ -56,58 +58,54 @@
 		({ width, height } = svg.getBoundingClientRect());
 	}
 
-	function handleShowTooltip(data: UniqueVisitorData) {
-        tooltip = {
-            show : true,
-            xPos : (xScale(data.hour.toString()) ?? 0) + xScale.bandwidth() / 2 - tooltipOffsetX,
-            yPos : (yScale(data.country) ?? 0) + yScale.bandwidth() / 2 + tooltipOffsetY,
-            visitors : data.value,
-            country : data.country,
-            hour : data.hour
-        };
+	function handleShowTooltip(data: ChartData) {
+        tooltipShow = true;
+        tooltipPosX = (xScale(data.xValue.toString()) ?? 0) + xScale.bandwidth() / 2 - tooltipOffsetX;
+        tooltipPosY = (yScale(data.yValue) ?? 0) + yScale.bandwidth() / 2 + tooltipOffsetY;
+        tooltipData = getTooltipData(data);
     }
 
     function handleHideTooltip() {
-        tooltip.show = false;
+        tooltipShow = false;
     }
 </script>
 
 <!-- keep it responsive -->
 <svelte:window on:resize={resize} />
 
-<div class="relative h-full">
-    <!-- tooltip -->
-    <div class="absolute opacity-0 w-auto scale-0 h-auto px-4 py-3 bg-white text-sm shadow-[2px_2px_8px_rgba(0,0,0,0.2)] rounded pointer-events-none flex flex-col transition-all duration-200 ease-in-out after:width-0 after:left-[calc(50%-8px)] after:top-[-8px] after:content-[' '] after:absolute after:border-8 after:border-x-transparent after:border-t-transparent after:border-b-white after:mt-[-8px]" 
-         class:opacity-100={tooltip.show} 
-         class:scale-100={tooltip.show}
-         style="left: {tooltip.xPos}px; top: {tooltip.yPos}px;" aria-label="tooltip" role="tooltip"
-         bind:clientWidth={tooltipWidth}
-    > 
+<div class="relative h-full overflow-x-scroll">
+    <ChartTooltip show={tooltipShow} xPos={tooltipPosX} yPos={tooltipPosY} bind:tooltipWidth>
         <div class="grid grid-flow-row-dense grid-cols-[1fr_30px] gap-x-2 text-wtgrey-200 text-right">
-            <span class="">Unique Visitors:</span>
-            <span class="font-bold">{tooltip.visitors}</span>
-       
-            <span class="">Country:</span>
-            <span class="font-bold">{tooltip.country}</span>
-
-            <span class="">Hour:</span>
-            <span class="font-bold">{tooltip.hour}</span>
+            {#each tooltipData as data}
+                <span class="">{data.label}:</span>
+                <span class="font-bold">{data.value}</span>
+            {/each}
         </div>
-    </div>
+    </ChartTooltip>
 
-    <svg bind:this={svg}>
+    <svg bind:this={svg} viewBox="0 0 {width} {height}" class="w-full h-full min-w-[600px]">
         <!-- y axis -->
         <g class="axis y-axis">
-            <g class="tick" transform="translate(0, {yExtendedLinePos})">
-                <line x1={padding.left} x2={xExtendedLinePos} />
+            <!-- as we place the heat map circles not on top of the lines, we need one more line at the y-end -->
+            <g transform="translate(0, {yExtendedLinePos})">
+                <line x1={padding.left} x2={xExtendedLinePos} class="stroke-wtgrey-300" />
             </g>
             {#each yTicks as tick}
-                <g class="tick tick-{tick.value}" transform="translate(0, {yScale(tick.value)})">
+                <g transform="translate(0, {yScale(tick.value)})" class="min-w-10">
                     {#if xTicksValues.length > 0}
-                        <line x1={padding.left} x2={xExtendedLinePos} />
+                        <line 
+                            x1={padding.left} 
+                            x2={xExtendedLinePos} 
+                            class="stroke-wtgrey-50" />
                     {/if}
                     {#if tick.label}
-                        <text x={padding.left - 8} y="{yScale.bandwidth() / 2 + 4}">{tick.label}</text>
+                        <text 
+                            x={padding.left - 8} 
+                            y="{yScale.bandwidth() / 2 + 4}" 
+                            class="fill-wtgrey-100 font-work-sans text-xs"
+                            style="text-anchor: end">
+                            {tick.label}
+                        </text>
                     {/if}
                 </g>
             {/each}
@@ -115,25 +113,43 @@
 
         <!-- x axis -->
         <g class="axis x-axis">
-            {#each xTicks as tick}
-                <g class="tick" transform="translate({xScale(tick.value)},0)">
+            {#each xTicks as tick, index}
+                <g transform="translate({xScale(tick.value)},0)">
                     {#if yTicksValues.length > 0}
-                        <line y1={yExtendedLinePos} y2={yLastPos} />
+                        <line 
+                            y1={yExtendedLinePos} 
+                            y2={yLastPos} 
+                            class="{index === 0 ? 'stroke-wtgrey-300' : 'stroke-wtgrey-50'}" />
                     {/if}
                     {#if tick.label}
-                        <text y={height - padding.bottom + 16} x="{xScale.bandwidth() / 2}">{tick.label}</text>
+                        <text 
+                            y={height - padding.bottom + 25} 
+                            x="{xScale.bandwidth() / 2}" 
+                            class="fill-wtgrey-100 font-work-sans text-xs"
+                            style="text-anchor: middle">
+                            {tick.label}
+                        </text>
                     {/if}
                 </g>
             {/each}
-            <g class="tick" transform="translate({xExtendedLinePos},0)">
-                <line y1={yExtendedLinePos} y2={yLastPos} />
+
+            <!-- as we place the heat map circles not on top of the lines, we need one more line at the x-end -->
+            <g transform="translate({xExtendedLinePos},0)">
+                <line y1={yExtendedLinePos} y2={yLastPos} class="stroke-wtgrey-50" />
             </g>
+
+            <!-- paint additional vertical lines -->
+            {#each verticalMarkers as line}
+                <g transform="translate({getXPosPercent(line.percent)},0)">
+                    <line y1={yExtendedLinePos + 8} y2={yLastPos} class="stroke-wtgrey-100" style="{line.dashed ? 'stroke-dasharray: 4px;' : ''}" />
+                </g>
+            {/each}
         </g>
 
         <!-- data points -->
-        {#each points as point}
-            {@const xPos = (xScale(point.hour.toString()) ?? 0) + xScale.bandwidth() / 2}
-            {@const yPos = (yScale(point.country) ?? 0) + yScale.bandwidth() / 2}
+        {#each data as point}
+            {@const xPos = (xScale(point.xValue.toString()) ?? 0) + xScale.bandwidth() / 2}
+            {@const yPos = (yScale(point.yValue) ?? 0) + yScale.bandwidth() / 2}
             <circle 
                 r="10"
                 cx={xPos} 
@@ -152,27 +168,3 @@
         {/each}
     </svg>
 </div>
-
-<style>
-	svg {
-		width: 100%;
-		height: 100%;
-	}
-
-	.tick line {
-		stroke: #F0EFEF;
-	}
-
-	text {
-		font-size: 12px;
-		fill: #999;
-	}
-
-	.x-axis text {
-		text-anchor: middle;
-	}
-
-	.y-axis text {
-		text-anchor: end;
-	}
-</style>

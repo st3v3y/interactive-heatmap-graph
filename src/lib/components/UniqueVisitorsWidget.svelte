@@ -4,23 +4,32 @@
 	import type { DropdownOption } from "$lib/types/dropdown";
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import type { UniqueVisitorData } from "$lib/types/unique-vistors";
 	import { DateRange } from "$lib/types/date-range";
 	import { DATE_RANGE_PARAM } from "$lib/const/searchParams";
+	import type { TooltipData } from "$lib/types/tooltip";
+	import type { ChartData, LineMarker } from "$lib/types/chart";
+	import type { UniqueVisitorData } from "$lib/types/unique-vistors";
     
     export let data: UniqueVisitorData[];
     export let dateRange: DateRange = DateRange.LastWeek; 
 
-    $: countries = Array.from(new Set(data.map((data) => data.country))).reverse()
-        .map((country) => ({ label: country, value: country }));
-    const hourLabels: {[key: string]: string} = { "1": "1 hrs", "12": "12 hrs", "24": "24 hrs" };
+    let isLoading = false;
+   
+    const hourLabels: {[key: string]: string} = { "1": "1 hr", "12": "12 hr", "24": "24 hr" };
     const hours = Array.from({length: 24}, (_, i) => (i + 1).toString())
         .map((hour) => (
             { label: (hourLabels[hour] ?? ''), value: hour }
         ));
     const colorScale = ["#FFECE3", "#FBAB8F", "#FF7875", "#E6352B", "#800020"];
+    const verticalMarkers: LineMarker[] = [
+        {percent: 25, dashed: true}, 
+        {percent: 50, dashed: false}, 
+        {percent: 75, dashed: true}
+    ];
 
-    let isLoading = false;
+    $: chartData = data.map((data) => ({ xValue: data.hour, yValue: data.country, value: data.value }));
+    $: countries = Array.from(new Set(data.map((data) => data.country))).reverse()
+        .map((country) => ({ label: country, value: country }));
 
     async function handleDateRangeChange(option: CustomEvent<DropdownOption>): Promise<void> {
         isLoading = true;
@@ -37,12 +46,20 @@
         { label: 'Last quarter', value: 'last-quarter' },
         { label: 'Last year', value: 'last-year' },
     ]
+
+    function getTooltipData(data: ChartData): TooltipData[] {
+        return [
+            { label: 'Unique Visitors', value: data.value },
+            { label: 'Country', value: data.yValue },
+            { label: 'Hour', value: data.xValue },
+        ] as TooltipData[];
+    }
 </script>
 
 <div class="flex flex-col gap-y-8">
-    <div class="flex justify-between items-center py-2.5">
+    <div class="flex justify-between flex-wrap sm:flex-nowrap items-center py-2.5 w-full">
         <h1 class="text-2xl font-inter font-semibold">Unique Destination Heatmap</h1>
-        <div class="flex gap-4 items-center">
+        <div class="flex gap-4 items-center mt-5 sm:mt-0 w-full sm:w-auto">
             {#if isLoading}
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin stroke-wtred"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
             {/if}
@@ -50,16 +67,16 @@
         </div>
     </div>
 
-    <div class="w-full h-[900px] rounded-xl border border-wtgrey-95 px-5 py-3 pb-12 bg-white">
-        <div class="flex justify-between items-center pt-5">
+    <div class="w-full h-auto rounded-xl border border-wtgrey-95 px-5 py-3 bg-white">
+        <div class="flex justify-between flex-wrap sm:flex-nowrap items-center pt-5 gap-x-4">
             <h2 class="text-sm font-semibold font-inter">Visitors by country and hour of the day</h2>
-            <div class="flex gap-x-2 items-center mr-10">
-                <span class="font-work-sans text-xs">Less to more unique visitors</span>
+            <div class="flex gap-x-2 items-center mt-5 sm:mt-0">
+                <span class="font-work-sans text-xs text-right">Less to more unique visitors</span>
                 {#each colorScale as color}
-                    <div class="h-4 w-4 rounded-full" style="background-color: {color}"></div>
+                    <div class="h-4 w-4 min-h-4 min-w-4 rounded-full" style="background-color: {color}"></div>
                 {/each}
             </div>
         </div>
-        <Heatmap points={data} xTicks={hours} yTicks={countries} colorScale={colorScale} />
+        <Heatmap data={chartData} xTicks={hours} yTicks={countries} colorScale={colorScale} {verticalMarkers} {getTooltipData} />
     </div>
 </div>
