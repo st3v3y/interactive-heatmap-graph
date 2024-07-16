@@ -55,7 +55,7 @@
 	onMount(resize);
 
 	function resize() {
-		({ width, height } = svg.getBoundingClientRect());
+		({ width } = svg.getBoundingClientRect());
 	}
 
 	function handleShowTooltip(data: ChartData) {
@@ -75,7 +75,7 @@
 
 <div class="relative h-full overflow-x-scroll">
     <ChartTooltip show={tooltipShow} xPos={tooltipPosX} yPos={tooltipPosY} bind:tooltipWidth>
-        <div class="grid grid-flow-row-dense grid-cols-[1fr_30px] gap-x-2 text-wtgrey-200 text-right">
+        <div class="grid grid-flow-row-dense grid-cols-[1fr_50px] gap-x-2 text-wtgrey-200 text-right">
             {#each tooltipData as data}
                 <span class="">{data.label}:</span>
                 <span class="font-bold">{data.value}</span>

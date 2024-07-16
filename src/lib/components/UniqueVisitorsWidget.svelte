@@ -7,9 +7,11 @@
 	import { DateRange } from "$lib/types/date-range";
 	import { DATE_RANGE_PARAM } from "$lib/const/searchParams";
 	import type { TooltipData } from "$lib/types/tooltip";
-	import type { ChartData, LineMarker } from "$lib/types/chart";
+	import type { ChartData, ChartTick, LineMarker } from "$lib/types/chart";
 	import type { UniqueVisitorData } from "$lib/types/unique-vistors";
-    
+    import { countries as countryIcons } from 'country-flag-icons';
+    import getUnicodeFlagIcon from 'country-flag-icons/unicode';
+
     export let data: UniqueVisitorData[];
     export let dateRange: DateRange = DateRange.LastWeek; 
 
@@ -22,14 +24,14 @@
         ));
     const colorScale = ["#FFECE3", "#FBAB8F", "#FF7875", "#E6352B", "#800020"];
     const verticalMarkers: LineMarker[] = [
-        {percent: 25, dashed: true}, 
-        {percent: 50, dashed: false}, 
-        {percent: 75, dashed: true}
+        { percent: 25, dashed: true }, 
+        { percent: 50, dashed: false }, 
+        { percent: 75, dashed: true }
     ];
 
     $: chartData = data.map((data) => ({ xValue: data.hour, yValue: data.country, value: data.value }));
     $: countries = Array.from(new Set(data.map((data) => data.country))).reverse()
-        .map((country) => ({ label: country, value: country }));
+        .map((country) => ({ label: country, value: country } as ChartTick));
 
     async function handleDateRangeChange(option: CustomEvent<DropdownOption>): Promise<void> {
         isLoading = true;
@@ -45,12 +47,14 @@
         { label: 'Last month', value: 'last-month' },
         { label: 'Last quarter', value: 'last-quarter' },
         { label: 'Last year', value: 'last-year' },
-    ]
+    ];
 
     function getTooltipData(data: ChartData): TooltipData[] {
+        const flag = countryIcons.includes(data.yValue) ? getUnicodeFlagIcon(data.yValue) : data.yValue;
+        
         return [
             { label: 'Unique Visitors', value: data.value },
-            { label: 'Country', value: data.yValue },
+            { label: 'Country', value: `${flag} ${data.yValue}` },
             { label: 'Hour', value: data.xValue },
         ] as TooltipData[];
     }
