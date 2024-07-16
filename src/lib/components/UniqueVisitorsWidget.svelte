@@ -11,11 +11,16 @@
     export let data: UniqueVisitorData[];
     export let dateRange: DateRange = DateRange.LastWeek; 
 
-    $: countries = Array.from(new Set(data.map((data) => data.country))).reverse();
-    const hours = Array.from({length: 24}, (_, i) => (i + 1).toString());
+    $: countries = Array.from(new Set(data.map((data) => data.country))).reverse()
+        .map((country) => ({ label: country, value: country }));
+    const hourLabels: {[key: string]: string} = { "1": "1 hrs", "12": "12 hrs", "24": "24 hrs" };
+    const hours = Array.from({length: 24}, (_, i) => (i + 1).toString())
+        .map((hour) => (
+            { label: (hourLabels[hour] ?? ''), value: hour }
+        ));
+    const colorScale = ["#FFECE3", "#FBAB8F", "#FF7875", "#E6352B", "#800020"];
 
     let isLoading = false;
-    let colorScale = ["#FFECE3", "#FBAB8F", "#FF7875", "#E6352B", "#800020"];
 
     async function handleDateRangeChange(option: CustomEvent<DropdownOption>): Promise<void> {
         isLoading = true;

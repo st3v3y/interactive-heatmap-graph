@@ -3,10 +3,11 @@
 	import { scaleBand, scaleLinear } from 'd3';
 	import type { UniqueVisitorData } from '$lib/types/unique-vistors';
 	import { generateInterpolatedArray } from '$lib/utils/math';
+	import type { ChartTick } from '$lib/types/chart';
 
 	export let points: UniqueVisitorData[];
-    export let xTicks: string[] = ["1", "12", "24"];
-	export let yTicks: string[] = [];
+    export let xTicks: ChartTick[] = [];
+	export let yTicks: ChartTick[] = [];
     export let colorScale = ["#FFECE3", "#800020"];
 
 	let svg: SVGElement;
@@ -29,19 +30,21 @@
     const tooltipOffsetY = 20; // offset from the top of the heatmap data point
 
     $: maxValue = Math.max(...points.map((point) => point.value));
+    $: xTicksValues = xTicks.map((tick) => tick.value);
+    $: yTicksValues = yTicks.map((tick) => tick.value);
 
 	$: xScale = scaleBand()
 		.range([padding.left, width - padding.right])
-        .domain(xTicks);
+        .domain(xTicksValues);
 
 	$: yScale = scaleBand()
 		.range([height - padding.bottom, padding.top])
-        .domain(yTicks);
+        .domain(yTicksValues);
 
     // as we place the heat map circles not on top of the lines, we need one my line at the x-end and y-end
-    $: yExtendedLinePos = (yScale(yTicks[0]) ?? 0) + yScale.bandwidth(); 
-    $: xExtendedLinePos = (xScale(xTicks[xTicks.length - 1]) ?? 0) + xScale.bandwidth();
-    $: yLastPos = yScale(yTicks[yTicks.length - 1]) ?? 0;
+    $: yExtendedLinePos = (yScale(yTicksValues[0]) ?? 0) + yScale.bandwidth(); 
+    $: xExtendedLinePos = (xScale(xTicksValues[xTicksValues.length - 1]) ?? 0) + xScale.bandwidth();
+    $: yLastPos = yScale(yTicksValues[yTicksValues.length - 1]) ?? 0;
 
     $: heatmapColor = scaleLinear()
         .range(colorScale)  // supposed to be Iterable<number>, but works with string[] for this case
@@ -99,11 +102,13 @@
                 <line x1={padding.left} x2={xExtendedLinePos} />
             </g>
             {#each yTicks as tick}
-                <g class="tick tick-{tick}" transform="translate(0, {yScale(tick)})">
-                    {#if xTicks.length > 0}
+                <g class="tick tick-{tick.value}" transform="translate(0, {yScale(tick.value)})">
+                    {#if xTicksValues.length > 0}
                         <line x1={padding.left} x2={xExtendedLinePos} />
                     {/if}
-                    <text x={padding.left - 8} y="{yScale.bandwidth() / 2 + 4}">{tick}</text>
+                    {#if tick.label}
+                        <text x={padding.left - 8} y="{yScale.bandwidth() / 2 + 4}">{tick.label}</text>
+                    {/if}
                 </g>
             {/each}
         </g>
@@ -111,11 +116,13 @@
         <!-- x axis -->
         <g class="axis x-axis">
             {#each xTicks as tick}
-                <g class="tick" transform="translate({xScale(tick)},0)">
-                    {#if yTicks.length > 0}
+                <g class="tick" transform="translate({xScale(tick.value)},0)">
+                    {#if yTicksValues.length > 0}
                         <line y1={yExtendedLinePos} y2={yLastPos} />
                     {/if}
-                    <text y={height - padding.bottom + 16} x="{xScale.bandwidth() / 2}">{tick}</text>
+                    {#if tick.label}
+                        <text y={height - padding.bottom + 16} x="{xScale.bandwidth() / 2}">{tick.label}</text>
+                    {/if}
                 </g>
             {/each}
             <g class="tick" transform="translate({xExtendedLinePos},0)">
