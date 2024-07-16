@@ -7,10 +7,8 @@ export const uniqueVisitorsParamsSchema = z.object({
 
 export const uniqueVisitorsResponseSchema = z.object({
     country: z.string(),
-    hours: z.array(z.object({
-        hour: z.number(),
-        unique: z.number(),
-    }))
+    hour: z.number(),
+    value: z.number(),
 });
 
 export type UniqueVisitorsParams = z.infer<typeof uniqueVisitorsParamsSchema>;
