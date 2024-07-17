@@ -183,3 +183,12 @@ I updated the ElasticSearch package to version 8.14.0, which provides additional
    - The `.toRecords<MyDataType>()` function, which returns only the results (without column information) and types them according to the given type.
 
 These features make working with ESQL more straightforward and type-safe compared to DSL.
+
+## Ideas for Further Improvements
+
+1. The vertical lines currently set statically to 6am and 6pm could be dynamically calculated. They could display the average core visitor times across all countries. This could be achieved by calculating the average value for each country from 0-12 and 12-24 hours, then taking the average of those to determine the average start and end times. This could be further enhanced by displaying the average core visit times for a single country when hovering over the country "row" in the chart. The vertical lines could animate into their positions for a more dynamic user experience.
+2. Due to the decision to use ESQL instead of DSL, it was necessary to implement two separate database calls to retrieve the required data. This could be improved by implementing a JOIN or subquery once Elastic Search provides this functionality in ESQL (which, to my knowledge, is not currently possible).
+3. Regarding database efficiency, a significant portion of the database traffic could be reduced by implementing an appropriate caching strategy. As this chart does not display real-time data, the information could be cached for several hours or even a full day.
+4. The dropdown used to limit the number of countries displayed in the chart could be enhanced by implementing a tag list field with autocomplete functionality. This would allow users to add and remove specific countries, which might be useful for viewing data for particular countries or comparing data between two or more countries.
+5. While the chart is implemented in a Svelte-friendly way by generating SVG elements declaratively rather than imperatively, the generation of SVG elements could be further improved. Creating reusable components for elements such as <Axis>, <Labels>, <Lines>, and <Circles> (data points) would make the chart code more modular, easier to read, and simpler to maintain.
+6. Currently, when activating the "Display total unique visitors" toggle, text elements are displayed on the right side of the chart. While this works well, implementing a Dual Axis chart could be considered for a more integrated visualization of this data.
