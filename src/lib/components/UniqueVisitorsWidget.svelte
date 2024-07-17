@@ -11,12 +11,14 @@
 	import type { UniqueVisitorData } from "$lib/types/unique-vistors";
     import { countries as countryIcons } from 'country-flag-icons';
     import getUnicodeFlagIcon from 'country-flag-icons/unicode';
+	import Toggle from "./Toggle.svelte";
 
     export let data: UniqueVisitorData[];
     export let dateRange: DateRange = DateRange.LastWeek; 
 
     let isLoading = false;
-   
+    let displayTotals = false;
+
     const hourLabels: {[key: string]: string} = { "1": "1 hr", "12": "12 hr", "24": "24 hr" };
     const hours = Array.from({length: 24}, (_, i) => (i + 1).toString())
         .map((hour) => (
@@ -63,24 +65,27 @@
 <div class="flex flex-col gap-y-8">
     <div class="flex justify-between flex-wrap sm:flex-nowrap items-center py-2.5 w-full">
         <h1 class="text-2xl font-inter font-semibold">Unique Destination Heatmap</h1>
-        <div class="flex gap-4 items-center mt-5 sm:mt-0 w-full sm:w-auto">
-            {#if isLoading}
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin stroke-wtred"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-            {/if}
-            <Dropdown labelPrefix="Show Me" selectedValue={dateRange} options={dropDownOptions} on:change={handleDateRangeChange} />
+        <div class="flex gap-x-4 flex-wrap sm:flex-nowrap">
+            <div class="flex items-center mt-5 md:mt-0">
+                <Toggle label="Display Total Unique Visitors" bind:checked={displayTotals} />
+            </div>
+            <div class="flex items-center mt-5 md:mt-0 w-full md:w-auto">
+                <Dropdown labelPrefix="Show Me" selectedValue={dateRange} options={dropDownOptions} on:change={handleDateRangeChange} {isLoading} />
+            </div>
         </div>
     </div>
 
     <div class="w-full h-auto rounded-xl border border-wtgrey-95 px-5 py-3 bg-white">
         <div class="flex justify-between flex-wrap sm:flex-nowrap items-center pt-5 gap-x-4">
             <h2 class="text-sm font-semibold font-inter">Visitors by country and hour of the day</h2>
-            <div class="flex gap-x-2 items-center mt-5 sm:mt-0">
-                <span class="font-work-sans text-xs text-right">Less to more unique visitors</span>
-                {#each colorScale as color}
-                    <div class="h-4 w-4 min-h-4 min-w-4 rounded-full" style="background-color: {color}"></div>
-                {/each}
+            
+                <div class="flex gap-x-2 items-center mt-5 sm:mt-0">
+                    <span class="font-work-sans text-xs text-right">Less to more unique visitors</span>
+                    {#each colorScale as color}
+                        <div class="h-4 w-4 min-h-4 min-w-4 rounded-full" style="background-color: {color}"></div>
+                    {/each}
+                </div>
             </div>
-        </div>
-        <Heatmap data={chartData} xTicks={hours} yTicks={countries} colorScale={colorScale} {verticalMarkers} {getTooltipData} />
+        <Heatmap data={chartData} xTicks={hours} yTicks={countries} colorScale={colorScale} {verticalMarkers} {displayTotals} {getTooltipData} />
     </div>
 </div>

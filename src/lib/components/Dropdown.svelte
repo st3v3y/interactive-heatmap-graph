@@ -5,6 +5,7 @@
     export let labelPrefix: string = '';
     export let selectedValue: string = '';
     export let options: DropdownOption[] = [];
+    export let isLoading: boolean = false;
 
 	const dispatch = createEventDispatcher<{change: DropdownOption}>();
     let isDropdownOpen = false;
@@ -42,6 +43,11 @@
         <span class="flex items-center">
             <span class="ml-1 block truncate text-wtgray-200 text-[15px] font-worksans">{labelPrefix} {selectedOption?.label}</span>
         </span>
+        {#if isLoading}
+            <span class="pointer-events-none absolute inset-y-2.5 right-10 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin stroke-wtred"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </span>
+        {/if}
         <span class="pointer-events-none absolute inset-y-2.5 right-0 ml-3 flex items-center pr-3 border-l border-wtgray-85 h-5 pl-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="5" height="5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-wtgray-900 rotate-180"><path d="m18 15-6-6-6 6"/></svg>
         </span>
