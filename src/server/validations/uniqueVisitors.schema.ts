@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const uniqueVisitorsParamsSchema = z.object({
+    limit: z.number({ required_error: 'Limit is required' }),
 	from: z.coerce.date({ required_error: 'From date is required' }),
     until: z.coerce.date({ required_error: 'To date is required' })
 });

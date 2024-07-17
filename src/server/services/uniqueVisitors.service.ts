@@ -17,7 +17,7 @@ export class UniqueVisitorsService {
 				BY country = geo.dest
 			| SORT value DESC
 			| KEEP country
-			| LIMIT 25`
+			| LIMIT ${param.limit}`
 		}).toRecords<{ country: string }>();
 
 		// First, I used DSL to receive the required data (see previous commits). 
