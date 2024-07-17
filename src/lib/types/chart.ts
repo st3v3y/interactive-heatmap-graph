@@ -2,11 +2,11 @@ export type ChartTick = { value: string, label: string };
 
 export type ChartData = {
     yValue: string,
-    xValue: number,
+    xValue: string,
     value: number
 }
 
 export type LineMarker = {
-    percent: number,
+    xValue: string,
     dashed: boolean
 }

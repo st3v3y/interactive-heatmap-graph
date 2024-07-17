@@ -19,12 +19,12 @@
         ));
     const colorScale = ["#FFECE3", "#FBAB8F", "#FF7875", "#E6352B", "#800020"];
     const verticalMarkers: LineMarker[] = [
-        { percent: 25, dashed: true }, 
-        { percent: 50, dashed: false }, 
-        { percent: 75, dashed: true }
+        { xValue: "6", dashed: true }, 
+        { xValue: "12", dashed: false }, 
+        { xValue: "18", dashed: true }
     ];
 
-    $: chartData = data.map((data) => ({ xValue: data.hour, yValue: data.country, value: data.value }));
+    $: chartData = data.map((data) => ({ xValue: data.hour.toString(), yValue: data.country, value: data.value }));
     $: countries = Array.from(new Set(data.map((data) => data.country))).reverse()
         .map((country) => ({ label: country, value: country } as ChartTick));
 

@@ -56,13 +56,6 @@
         .range(colorScale)  // supposed to be Iterable<number>, but works with string[] for this case
         .domain(generateInterpolatedArray(colorScale.length, totalsMaxY)) : () => [];
 
-    $: getXPosPercent = (percent: number): number => {
-        const perc = Math.max(0, Math.min(100, percent));
-        const tickPercentIndex = Math.round(xTicksValues.length * perc / 100);
-        const tickPercent = xTicksValues[tickPercentIndex];
-        return ((xScale(tickPercent) ?? 0)) - xScale.bandwidth() / 2;
-    }
-
 	onMount(resize);
 
 	function resize() {
@@ -173,7 +166,7 @@
 
             <!-- paint additional vertical lines -->
             {#each verticalMarkers as line}
-                <g transform="translate({getXPosPercent(line.percent)},0)">
+                <g transform="translate({(xScale(line.xValue.toString()) ?? 0) + xScale.bandwidth() / 2},0)">
                     <line y1={yExtendedLinePos + 8} y2={yLastPos} class="stroke-wtgrey-100" style="{line.dashed ? 'stroke-dasharray: 4px;' : ''}" />
                 </g>
             {/each}
