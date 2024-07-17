@@ -6,7 +6,7 @@
 
 <Header />
 
-<main class="flex flex-col p-14">
+<main class="flex flex-col p-4 sm:p-10 md:p-14">
 	<slot />
 </main>
 
