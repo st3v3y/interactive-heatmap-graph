@@ -38,7 +38,7 @@
 	}
 </script>
   
-<div class="relative w-full sm:w-auto" on:focusout={handleDropdownFocusLoss}>
+<div class="relative w-full sm:w-auto" on:focusout={handleDropdownFocusLoss} role="listbox">
     <button type="button" class="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left h-10 shadow-sm ring-1 ring-inset ring-wtgrey-95 focus:outline-none focus:ring-2 focus:ring-wtred sm:text-sm sm:leading-6" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label" on:click={handleDropdownClick}>
         <span class="flex items-center pr-3" class:pr-8={isLoading}>
             <span class="ml-1 block truncate text-wtgray-200 text-[15px] font-worksans">{labelPrefix} {selectedOption?.label}</span>

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Heatmap from "$lib/components/Heatmap.svelte";
+	import Heatmap from "$lib/components/chart/Heatmap.svelte";
 	import type { TooltipData } from "$lib/types/tooltip";
 	import type { ChartData, ChartTick, LineMarker } from "$lib/types/chart";
 	import type { UniqueVisitorData } from "$lib/types/unique-vistors";
     import { countries as countryIcons } from 'country-flag-icons';
     import getUnicodeFlagIcon from 'country-flag-icons/unicode';
-	import Toggle from "./Toggle.svelte";
-	import Widget from "./Widget.svelte";
+	import Toggle from "$lib/components/controls/Toggle.svelte";
+	import Widget from "$lib/components/wrappers/Widget.svelte";
 
     export let data: UniqueVisitorData[];
 
@@ -18,20 +18,24 @@
             { label: (hourLabels[hour] ?? ''), value: hour }
         ));
     const colorScale = ["#FFECE3", "#FBAB8F", "#FF7875", "#E6352B", "#800020"];
+
+    // IDEA:Here it would be really nice to calculate the average value for each 
+    // country for 0 - 12 and 12 - 24 hours and then take average from those to get 
+    // total average core visitor times accross all countries. (Here I just chose '6' and '18' as an example)
     const verticalMarkers: LineMarker[] = [
-        { percent: 25, dashed: true }, 
-        { percent: 50, dashed: false }, 
-        { percent: 75, dashed: true }
+        { xValue: "6", dashed: true }, 
+        { xValue: "12", dashed: false }, 
+        { xValue: "18", dashed: true }
     ];
 
-    $: chartData = data.map((data) => ({ xValue: data.hour, yValue: data.country, value: data.value }));
+    $: chartData = data.map((data) => ({ xValue: data.hour.toString(), yValue: data.country, value: data.value }));
     $: countries = Array.from(new Set(data.map((data) => data.country))).reverse()
         .map((country) => ({ label: country, value: country } as ChartTick));
 
     function getTooltipData(data: ChartData): TooltipData[] {
         const flag = countryIcons.includes(data.yValue) ? getUnicodeFlagIcon(data.yValue) : data.yValue;
         return [
-            { label: 'Unique Visitors', value: data.value },
+            { label: 'Unique Visitors', value: data.value.toString() },
             { label: 'Country', value: `${flag} ${data.yValue}` },
             { label: 'Hour', value: data.xValue },
         ] as TooltipData[];

@@ -14,15 +14,21 @@ export const load = (async ({fetch, url}) => {
 
 	dateRangeFrom.setHours(0, 0, 0, 0);
 
+	let error = "";
+
 	const uniqueVisitorsResponse = await trpcServer(fetch).heatmap.getUniqueVisitors.query({
 		limit: isNaN(+countryLimitParam) ? defaultCountryLimit : parseInt(countryLimitParam),
 		from: dateRangeFrom,
 		until: new Date()
-	});
+	}).catch((e) => {
+		console.error("❌ Error while fetching data: getUniqueVisitors", e);
+		error = "An error occured while fetching the data. Please try again later.";
+	});	
 	
 	return {
-		uniqueVisitors: uniqueVisitorsResponse,
+		uniqueVisitors: uniqueVisitorsResponse ?? [],
 		dateRange: dateRangeType,
-		countryLimit: countryLimitParam
+		countryLimit: countryLimitParam.toString(),
+		error
 	};
 }) satisfies PageServerLoad;

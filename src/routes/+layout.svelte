@@ -1,13 +1,8 @@
 <script>
-	import Footer from '$lib/components/Footer.svelte';
-	import Header from '$lib/components/Header.svelte';
+	import BasePageLayout from '$lib/components/layouts/BasePageLayout.svelte';
 	import '../app.css';
 </script>
 
-<Header />
-
-<main class="flex flex-col p-4 sm:p-10 md:p-14">
+<BasePageLayout>
 	<slot />
-</main>
-
-<Footer />
+</BasePageLayout>

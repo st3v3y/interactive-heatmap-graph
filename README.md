@@ -1,78 +1,161 @@
-# Take-Home Project Requirement
+# Interactive Heatmap Graph
 
-## Objective
+## About the Project
 
-Enhance the provided starter project by implementing an interactive heatmap graph to display the number of unique visitors by country and hour of the day, with a selectable date range.
+This project was developed as part of the application process for [Bilby](https://www.bilby.ai/). It is forked from their provided repository: [full-stack-dev-take-home-project](https://github.com/bilbyai/full-stack-dev-take-home-project/).
 
-## Provided Resources
+## Project Objective
 
-- **Starter Project**: Pre-configured with SvelteKit, tRPC, TypeScript, and TailwindCSS, adhering to our coding standards.
-  - Includes sample code that greets the user by name.(can be removed)
-  - ElasticSearch client setup is included.
-- **Figma Design**: [Figma Design Link](https://www.figma.com/design/ryzsNfjmzOqVFWlFEcfKgq/Untitled?node-id=0-1&t=rzAYJm61YZciE01b-1)
-The design except the Graph is just a mock up you can improve it however you want
-- **Kibana Dashboard**: [Kibana Dashboard Link](https://bilby-terminal-test.kb.us-central1.gcp.cloud.es.io:9243/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b)
-  - **Credential**: [Login information](https://share.1password.com/s#E_P4JcYFTBIuH3d64rP2zrxUSCo3afQqMu5Xi6LONSE)
-  - **Graph**: Search for the heatmap graph titled "[Logs] Unique Destination Heatmap" in Kibana for reference.
+The main goal of this project is to implement an interactive heatmap graph that visualizes the number of unique visitors by country and hour of the day. Users can select a date range to filter the data, providing a dynamic and insightful view of visitor patterns across different time periods and geographical locations. As a basic project template served their provided [repository](https://github.com/bilbyai/full-stack-dev-take-home-project/) (where also more details about the objectives can be found) and for the design Bilby provided a link to a Figma file.
 
-## Task Description
+## Tech Stack
 
-1. **Clone and Fork the Starter Project**:
-   - Fork the repository to your GitHub account.
-   - Clone the provided repository to your local development environment.
-   - **Running the Project**:
-     - After cloning or forking the project, navigate to the project directory.
-     - Install dependencies with `npm install` (or `pnpm install` or `yarn`).
-     - Rename `.env.example` to `.env` and add the env information from this [link](https://share.1password.com/s#_im5DiShEnUuy-6-FXuxfX_7L7_2zyvHqAM4lZBY2Is)
-     - Start a development server:
+This project leverages a modern web development stack to deliver a responsive and interactive data visualization tool:
 
-       ```bash
-       npm run dev
+- [SvelteKit](https://kit.svelte.dev/): For building the web application
+- [tRPC](https://trpc.io/): For type-safe API calls
+- [ElasticSearch](https://www.elastic.co/): As the database for storing and querying visitor data
+- [D3.js](https://d3js.org/): For creating the interactive heatmap visualization
+- [Tailwind CSS](https://tailwindcss.com/): For styling the user interface
 
-       # or start the server and open the app in a new browser tab
-       npm run dev -- --open
-       ```
+## Configuration
 
-2. **Implement the Heatmap Graph**:
-   - **Frontend**:
-     - Use **SvelteKit** to create the interactive heatmap UI.
-     - Style the heatmap according to the provided Figma design
-     - Utilize a suitable visualization library such as **D3.js** or any other library appropriate for creating heatmaps.
-     - The heatmap should have:
-       - **Y-axis**: List of countries.
-       - **X-axis**: Hours of the day (1-24).
-       - **Cells**: Represent the number of unique visitors, with varying colors indicating different visitor counts.
-     - (Optional) Implement interactivity features such as tooltips displaying detailed information when hovering over a cell.
-     - **Date Range Selector**:
-       - Add a select dropdown to filter data by predefined date ranges:
-         - Last week
-         - Last two weeks
-         - Last month
-         - Last quarter
-         - Last year
-       - Ensure the heatmap updates dynamically when the date range is changed.
+To set up the project:
 
-   - **Backend**:
-     - Use **tRPC** to create API endpoints for fetching data from ElasticSearch.
-     - Write endpoints to:
-       - Fetch and aggregate unique visitor data by country and hour.
-       - Filter data based on the selected date range.
-       - Handle the predefined date ranges to fetch appropriate data from ElasticSearch.
-     - Connect to the ElasticSearch instance using the provided Kibana credentials.
+1. Rename the `.env.example` file to `.env`
+2. Assign values to the following environment variables:
+   - `ELASTIC_SEARCH_CLOUD_ID`: Your ElasticSearch Cloud ID
+   - `ELASTIC_SEARCH_API_KEY`: Your ElasticSearch API Key
+   - `ELASTIC_SEARCH_INDEX`: Your ElasticSearch Index name
 
-   - **Data Handling**:
-     - Ensure the ElasticSearch queries are efficient and optimized for aggregation.
-     - Aggregate data to count unique visitors by country and hour.
+## Installation
 
-## Evaluation Criteria
+To get the project running locally:
 
-- **Code Quality**: Clean, readable, and maintainable code following best practices.
-- **Functionality**: Correct implementation of the heatmap and date range selector as per the provided Figma design.
-- **Interactivity**: Smooth and intuitive user interactions.
-- **Efficiency**: Optimal data fetching and processing from ElasticSearch.
-- **Documentation**: Clear and detailed documentation and README updates.
+```bash
+# Clone the repository
+git clone https://github.com/st3v3y/interactive-heatmap-graph.git
 
-#### Submission
+# Navigate to the project directory
+cd interactive-heatmap-graph
 
-- **Submission form**: [Form Link](https://forms.gle/E13oWiJk6nB3HTnz5)
-- **Repository**: Submit the link to your forked repository in the above google form
+# Install dependencies
+npm install
+# or
+yarn install
+
+# Start the development server
+npm run dev
+# or
+yarn dev
+```
+
+
+## Components
+
+Separating logic into components was a key focus to enhance code reusability, maintainability, and reduce duplication. These components could potentially be moved into a separate library for use across multiple projects. The main components created include:
+
+- `Heatmap`: Implements the logic for visualizing data as a heatmap (more details below)
+- `UniqueVisitorsWidget`: Processes data from the page and adds information for the `Heatmap` component
+- Control components: `Dropdown` and `Toggle`
+- Wrapper components: `Alert` for showing errors, `PageTitle` for reuse on future pages, `Widget` for card visualization
+- Layout components: `BaseLayout`, `Header`, and `Footer`
+
+## How to Use the Heatmap
+
+### UI
+
+- **Chart**: Visualizes visitor numbers per country and hour using colored circles. Color intensity represents relative visitor numbers (brighter for lower, darker for higher).
+- **Vertical Lines**: 
+  - Solid line at 12 pm
+  - Two dashed lines at 6 am and 6 pm, marking "core visitor" times
+- **Filter Options**:
+  - Time range dropdown: "Last Week", "Last 2 Weeks", "Last Month", "Last Quarter", "Last Year"
+  - Country display dropdown: Change the number of countries shown (This feature was not a requirement, but I found it a useful and quick-to-add feature, so I decided to add it.)
+- **"Display total unique visitors" toggle**: Shows total visits per country for the chosen time range (Also not a required feature, but I was very keen on adding this feature as it was (even wirth the example data) very interesting to see and visualize the total amount of visits per country for the chosen time range. This might be very helpful for the end user to identify from which countries come most of their visitors.)
+- **Legend**: Displays the color scale used in the heatmap
+
+### API
+
+The Heatmap component exports several variables for customization:
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| data | ChartData[] | undefined | Chart data array |
+| xTicks | ChartTick[] | [] | X-axis values and labels |
+| yTicks | ChartTick[] | [] | Y-axis values and labels |
+| colorScale | string[] | ["#FFECE3", "#800020"] | Color range for the heatmap |
+| width | number | 1000 | Initial chart width |
+| yTickHeight | number | 40 | Height of a single Y-axis data point |
+| padding | object | { top: 20, right: 0, bottom: 40, left: 30 } | Chart padding |
+| tooltipOffsetY | number | 20 | Tooltip Y-offset |
+| verticalMarkers | LineMarker[] | [] | Vertical lines on the chart |
+| getTooltipData | function | () => [] | Function to generate tooltip data |
+| displayTotals | boolean | false | Toggle for displaying X-axis totals |
+
+### Types
+
+The following tables provide a clear overview of the structure and purpose of each type used in the project and can give developers a quick reference for the data structures used in this codebase.
+
+
+#### UniqueVisitorData
+
+This type serves as interface for data returned from the database and forwarded to the client-side.
+
+| Name    | Type   | Description                               |
+|---------|--------|-------------------------------------------|
+| country | string | The country name                          |
+| hour    | number | The hour of the day (likely 0-23)         |
+| value   | number | The number of unique visitors for this entry |
+
+
+#### ChartTick
+
+Used for x and y axis, where each object represents one x or y axis coordinate.
+
+| Name  | Type   | Description                           |
+|-------|--------|---------------------------------------|
+| value | string | The actual value used for positioning |
+| label | string | The displayed label for the tick      |
+
+#### ChartData
+
+`ChartData` represents a single data point.
+
+| Name   | Type   | Description                               |
+|--------|--------|-------------------------------------------|
+| yValue | string | The value for the y-axis                  |
+| xValue | string | The value for the x-axis                  |
+| value  | number | The numerical value for the data point    |
+
+#### LineMarker
+
+This type is used to draw a vertical line on the chart. 
+
+| Name   | Type    | Description                                   |
+|--------|---------|-----------------------------------------------|
+| xValue | string  | The x-axis value where the line should appear |
+| dashed | boolean | Whether the line should be dashed or solid    |
+
+#### TooltipData
+
+Each object of the `TooltipData` type represents a data row that should be rendered in the chart tooltips.
+
+| Name  | Type   | Description                              |
+|-------|--------|------------------------------------------|
+| label | string | The label for the tooltip data point     |
+| value | string | The value to display for the data point  |
+
+
+## Why ESQL Instead of DSL
+
+Initially, the project used DSL (Domain Specific Language) to query ElasticSearch for the required data (visible in earlier commits). However, I decided to switch to ESQL (ElasticSearch SQL) for several reasons:
+
+1. ESQL is easier to read and maintain, with syntax similar to SQL.
+2. The result is typed and doesn't require additional processing.
+
+I updated the ElasticSearch package to version 8.14.0, which provides additional ESQL support through:
+   - The helper function `client.helpers.esql({ query: "" })`
+   - The `.toRecords<MyDataType>()` function, which returns only the results (without column information) and types them according to the given type.
+
+These features make working with ESQL more straightforward and type-safe compared to DSL.
