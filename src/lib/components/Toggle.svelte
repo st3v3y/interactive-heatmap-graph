@@ -4,7 +4,7 @@
 </script>
 
 <label for="toggleTwo" class="flex items-center gap-x-2 cursor-pointer select-none text-dark">
-    <span class="font-worksans text-sm text-right">{label}</span>
+    <span class="text-xs text-right">{label}</span>
     <div class="relative">
         <input type="checkbox" id="toggleTwo" class="peer sr-only" bind:checked />
         <div class="block h-6 rounded-full bg-wtgrey-95 w-10"></div>
