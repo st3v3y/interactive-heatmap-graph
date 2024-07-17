@@ -75,6 +75,20 @@ Separating logic into components was a key focus to enhance code reusability, ma
 - **"Display total unique visitors" toggle**: Shows total visits per country for the chosen time range (Also not a required feature, but I was very keen on adding this feature as it was (even wirth the example data) very interesting to see and visualize the total amount of visits per country for the chosen time range. This might be very helpful for the end user to identify from which countries come most of their visitors.)
 - **Legend**: Displays the color scale used in the heatmap
 
+
+*Screenshot Showing the UI:*
+
+![image](https://github.com/user-attachments/assets/78f5a984-f393-43da-9ffe-f60248dad9a6)
+
+*Here the function "Display total unique visitors" is activated, showing the horizontal bars representing the total visitor numbers (and visitor numbers themselves, which are removed in this screenshot):*
+
+![image](https://github.com/user-attachments/assets/b3217b58-c4ec-4912-b7e6-cbc5697bb006)
+
+*Tooltip showing the data of a single datapoint*
+
+![image](https://github.com/user-attachments/assets/5c0e3db1-a965-4023-85a0-5ab64bb3b8a6)
+
+
 ### API
 
 The Heatmap component exports several variables for customization:
@@ -105,7 +119,7 @@ This type serves as interface for data returned from the database and forwarded 
 | Name    | Type   | Description                               |
 |---------|--------|-------------------------------------------|
 | country | string | The country name                          |
-| hour    | number | The hour of the day (likely 0-23)         |
+| hour    | number | The hour of the day (1-24)                |
 | value   | number | The number of unique visitors for this entry |
 
 
@@ -113,10 +127,10 @@ This type serves as interface for data returned from the database and forwarded 
 
 Used for x and y axis, where each object represents one x or y axis coordinate.
 
-| Name  | Type   | Description                           |
-|-------|--------|---------------------------------------|
-| value | string | The actual value used for positioning |
-| label | string | The displayed label for the tick      |
+| Name  | Type   | Description                                                |
+|-------|--------|------------------------------------------------------------|
+| value | string | The actual value used for positioning of ChartData values  |
+| label | string | The displayed label for the tick                           |
 
 #### ChartData
 
@@ -145,6 +159,16 @@ Each object of the `TooltipData` type represents a data row that should be rende
 |-------|--------|------------------------------------------|
 | label | string | The label for the tooltip data point     |
 | value | string | The value to display for the data point  |
+
+
+## Responsive Design
+
+It was not directlty a requirement of this coding challenge, but as responsive design is crucial in today's multi-device world, I developed this project fully responsive, adapting seamlessly to various screen sizes and devices. With mobile devices accounting for almost 60% of global website traffic, and Google's mobile-first indexing, it's essential for UX and SEO performance.
+
+I've utilized Tailwind CSS classes throughout the application to ensure a consistent and user-friendly experience across desktops, tablets, and mobile devices.
+Tailwind CSS's responsive utility classes have been used to adjust layouts and component dimensions based on screen size. 
+
+![image](https://github.com/user-attachments/assets/95d53977-66a5-487d-844a-75fb2a2d4a3d)
 
 
 ## Why ESQL Instead of DSL
