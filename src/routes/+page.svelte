@@ -1,13 +1,13 @@
 <script lang="ts">
-	import Dropdown from "$lib/components/Dropdown.svelte";
-	import PageTitle from "$lib/components/PageTitle.svelte";
-	import UniqueVisitorsWidget from "$lib/components/UniqueVisitorsWidget.svelte";
+	import Dropdown from "$lib/components/controls/Dropdown.svelte";
+	import PageTitle from "$lib/components/wrappers/PageTitle.svelte";
+	import UniqueVisitorsWidget from "$lib/components/widgets/UniqueVisitorsWidget.svelte";
 	import type { DropdownOption } from "$lib/types/dropdown.js";
 	import { COUNTRY_LIMIT_PARAM, DATE_RANGE_PARAM } from "$lib/const/searchParams";
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { DateRange } from "$lib/types/date-range.js";
-	import Alert from "$lib/components/Alert.svelte";
+	import Alert from "$lib/components/wrappers/Alert.svelte";
 
 	export let data;
 

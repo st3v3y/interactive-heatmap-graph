@@ -4,7 +4,7 @@
 	import type { TooltipData } from '$lib/types/tooltip';
 	import { generateInterpolatedArray } from '$lib/utils/math';
 	import type { ChartData, ChartTick, LineMarker } from '$lib/types/chart';
-    import ChartTooltip from '$lib/components/ChartTooltip.svelte';
+    import ChartTooltip from '$lib/components/chart/ChartTooltip.svelte';
 
 	export let data: ChartData[];
     export let xTicks: ChartTick[] = [];

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Heatmap from "$lib/components/Heatmap.svelte";
+	import Heatmap from "$lib/components/chart/Heatmap.svelte";
 	import type { TooltipData } from "$lib/types/tooltip";
 	import type { ChartData, ChartTick, LineMarker } from "$lib/types/chart";
 	import type { UniqueVisitorData } from "$lib/types/unique-vistors";
     import { countries as countryIcons } from 'country-flag-icons';
     import getUnicodeFlagIcon from 'country-flag-icons/unicode';
-	import Toggle from "./Toggle.svelte";
-	import Widget from "./Widget.svelte";
+	import Toggle from "$lib/components/controls/Toggle.svelte";
+	import Widget from "$lib/components/wrappers/Widget.svelte";
 
     export let data: UniqueVisitorData[];
 
