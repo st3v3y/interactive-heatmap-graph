@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { DateRange } from "$lib/types/date-range.js";
+	import Alert from "$lib/components/Alert.svelte";
 
 	export let data;
 
@@ -27,7 +28,7 @@
 		{ label: '25 Countries', value: "25" }
 	];
 
-	$: ({ uniqueVisitors, dateRange, countryLimit } = data);
+	$: ({ uniqueVisitors, dateRange, countryLimit, error } = data);
 	
 	async function handleDateRangeChange(option: CustomEvent<DropdownOption>): Promise<void> {
         isLoadingDateRange = true;
@@ -53,12 +54,16 @@
 <section>
 	<div class="flex flex-col gap-y-8">
 		<PageTitle title="Unique Destination Heatmap">
-			<div class="flex items-center mt-5 md:mt-0 w-full md:w-auto gap-x-4">
+			<div class="flex items-center mt-5 md:mt-0 w-full md:w-auto gap-4 flex-wrap md:flex-nowrap">
 				<Dropdown labelPrefix="Display" selectedValue={countryLimit} options={countryLimitOptions} on:change={handleCountryLimitChange} isLoading={isLoadingLimit} />
 				<Dropdown labelPrefix="Show Me" selectedValue={dateRange} options={dropDownOptions} on:change={handleDateRangeChange} isLoading={isLoadingDateRange} />
 			</div>
 		</PageTitle>
 	
-		<UniqueVisitorsWidget data={uniqueVisitors}></UniqueVisitorsWidget>
+		{#if error}
+			<Alert>{error}</Alert>
+		{:else}
+			<UniqueVisitorsWidget data={uniqueVisitors}></UniqueVisitorsWidget>
+		{/if}
 	</div>
 </section>
