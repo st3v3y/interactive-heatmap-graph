@@ -11,7 +11,7 @@
 	export let yTicks: ChartTick[] = [];
     export let colorScale = ["#FFECE3", "#800020"];
 	export let width = 1000; // dynamic width, which changes onMount and when the window is resized
-	export let height = 900; // same as width
+    export let yTickHeight = 40;
 	export let padding = { top: 20, right: 0, bottom: 40, left: 30 }; // padding for the heatmap chart
     export let tooltipOffsetY = 20; // offset from the top of the heatmap data point
     export let verticalMarkers: LineMarker[] = [];
@@ -24,8 +24,9 @@
     let tooltipPosY = 0;
     let tooltipData: TooltipData[] = [];
     let tooltipWidth = 0; // dynamic tooltip width
-    $: displayTotalsPaddingRight = padding.right + (displayTotals ? 40 : 0);
 
+    $: height = yTicks.length * yTickHeight + padding.top + padding.bottom;
+    $: displayTotalsPaddingRight = padding.right + (displayTotals ? 40 : 0);
     $: tooltipOffsetX = tooltipWidth / 2; // needed to place the tooltip in the middle
     $: maxValue = Math.max(...data.map((data) => data.value));
     $: xTicksValues = xTicks.map((tick) => tick.value);
@@ -103,7 +104,8 @@
                     height={yScale.bandwidth() - 10} 
                     fill="{barsColor(totalsY[tick.value]).toString()}"
                     class:opacity-60={displayTotals}
-                    class="opacity-0 transition-all duration-[1s] ease-in-out hover:opacity-100"
+                    class="opacity-0 origin-left transition-[width,opacity] duration-[1s] ease-in-out hover:opacity-100 motion-reduce:transition-none"
+                    style="transform-box: fill-box;"
                 />
                 <text 
                     x={xExtendedLinePos + 7} 
